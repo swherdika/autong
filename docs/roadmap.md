@@ -1,0 +1,53 @@
+# Roadmap
+
+_Last updated: 2026-07-18_
+
+Milestones roughly in order. Each builds on the last; scope intentionally starts
+tiny and grows.
+
+## M0 — Planning & design ✅
+
+- [x] Define the problem, users, scope, non-goals ([planning](planning.md))
+- [x] Architecture, domain model, engine spec ([design](design.md))
+- [x] Scaffold React + TypeScript + Vite
+
+## M1 — Calc engine
+
+The brain, before any UI.
+
+- [ ] Domain types (`Preset`, `Component`, `Item`, `Frequency`)
+- [ ] `occurrences`, `itemNeed`, `componentTotal`, `monthlyTotal`, `remaining`
+- [ ] Vitest unit tests, incl. month-length and weekly-`ceil` edge cases
+
+## M2 — Minimal planner UI
+
+The first thing you can actually use in a browser.
+
+- [ ] Add / edit / remove components and items
+- [ ] Live per-component totals and monthly grand total
+- [ ] Income input → remaining (surplus / shortfall) display
+- [ ] Rupiah formatting
+
+## M3 — Presets & persistence
+
+Stop re-typing your budget every payday.
+
+- [ ] Save the current budget as a named preset (`localStorage`)
+- [ ] Load / duplicate / delete presets
+- [ ] A sensible default preset to start from
+
+## M4 — Polish & cross-platform reach
+
+- [ ] Responsive layout / mobile-friendly UI
+- [ ] PWA (installable) — the cheapest path to "it's on my phone"
+- [ ] Later: React Native or desktop (Tauri) shell over the same engine
+
+## M5 — Reporting
+
+- [ ] Log finalized monthly plans
+- [ ] Yearly report / trends
+
+## Someday — the dream 🌅
+
+- [ ] Bank / open-banking integration to *execute* the allocation automatically
+      (regulated, hard; explicitly out of scope until much later)
