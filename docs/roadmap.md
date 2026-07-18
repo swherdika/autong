@@ -11,13 +11,13 @@ tiny and grows.
 - [x] Architecture, domain model, engine spec ([design](design.md))
 - [x] Scaffold React + TypeScript + Vite
 
-## M1 — Calc engine
+## M1 — Calc engine ✅
 
 The brain, before any UI.
 
-- [ ] Domain types (`Preset`, `Component`, `Item`, `Frequency`)
-- [ ] `occurrences`, `itemNeed`, `componentTotal`, `monthlyTotal`, `remaining`
-- [ ] Vitest unit tests, incl. month-length and weekly-`ceil` edge cases
+- [x] Domain types (`Preset`, `Component`, `Item`, `Frequency`)
+- [x] `occurrences`, `itemNeed`, `componentTotal`, `monthlyTotal`, `remaining`
+- [x] Vitest unit tests (20), incl. month-length and weekly-`ceil` edge cases
 
 ## M2 — Minimal planner UI
 
