@@ -1,8 +1,15 @@
-# Payroll Allocator
+# Autong
+
+> **Auto**matic allocator for your **kantong**(s) — the money-pockets you split
+> your payroll into. (The name is a bilingual joke. It's fine, you'll get it.)
 
 A dynamic budget planner. Every payday, describe your recurring spending as
-line items and the app tells you exactly how much each spending category needs
+line items and Autong tells you exactly how much each spending category needs
 for the coming month — and what's left over to save.
+
+> _Note: v1 is a manual planner — you enter your numbers and it does the math.
+> "Auto" is where it's headed (see the [roadmap](docs/roadmap.md)), not where it
+> starts._
 
 Unlike the fixed "pockets" / auto-debit in banking apps, this is built for a
 budget that **changes every month**.
