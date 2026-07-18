@@ -28,13 +28,15 @@ The first thing you can actually use in a browser.
 - [ ] Income input → remaining (surplus / shortfall) display
 - [ ] Rupiah formatting
 
-## M3 — Presets & persistence
+## M3 — Persistence (local-only) ✅
 
-Stop re-typing your budget every payday.
+Stop re-typing your budget every payday. No backend, no database.
 
-- [ ] Save the current budget as a named preset (`localStorage`)
-- [ ] Load / duplicate / delete presets
-- [ ] A sensible default preset to start from
+- [x] Auto-save to `localStorage` on every change; reload on refresh
+- [x] JSON export / import — a portable "memory file" the user owns
+- [x] Sensible default (sample) budget on first run
+- [x] Choose a doodle icon per pocket (14-icon picker)
+- [ ] Named presets / multiple profiles (later)
 
 ## M4 — Polish & cross-platform reach
 

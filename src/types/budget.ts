@@ -11,6 +11,23 @@
 /** How often a purchase recurs within a month. */
 export type Frequency = 'daily' | 'weekly' | 'monthly';
 
+/** Key of a pocket's doodle icon. The registry lives in icons.ts. */
+export type IconKey =
+  | 'meal'
+  | 'coffee'
+  | 'transport'
+  | 'bills'
+  | 'house'
+  | 'dumbbell'
+  | 'shopping'
+  | 'heart'
+  | 'music'
+  | 'gift'
+  | 'piggy'
+  | 'plane'
+  | 'book'
+  | 'pocket';
+
 /** A single recurring purchase, e.g. "lunch" at Rp60,000 daily. */
 export interface Item {
   id: string;
@@ -24,6 +41,8 @@ export interface Item {
 export interface Component {
   id: string;
   name: string;
+  /** Key of the doodle icon shown for this pocket (see icons.ts). */
+  icon?: IconKey;
   items: Item[];
 }
 

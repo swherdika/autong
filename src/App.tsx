@@ -1,5 +1,12 @@
-import { useMemo, useState } from 'react';
-import type { Component, Frequency, Item, Preset, TargetMonth } from './types/budget';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  Component,
+  Frequency,
+  IconKey,
+  Item,
+  Preset,
+  TargetMonth,
+} from './types/budget';
 import {
   componentTotal,
   itemNeed,
@@ -7,12 +14,13 @@ import {
   occurrences,
   remaining,
 } from './engine';
-import mealIcon from './assets/icons/meal.svg';
-import transportIcon from './assets/icons/transport.svg';
-import billsIcon from './assets/icons/bills.svg';
-import houseIcon from './assets/icons/house.svg';
-import dumbbellIcon from './assets/icons/dumbbell.svg';
-import pocketIcon from './assets/icons/pocket.svg';
+import { ICONS, iconSrc } from './icons';
+import {
+  exportToFile,
+  loadState,
+  parseImportedFile,
+  saveState,
+} from './storage';
 import './App.css';
 
 const rp = (n: number) => 'Rp' + Math.round(n).toLocaleString('id-ID');
@@ -21,21 +29,12 @@ const FREQUENCIES: Frequency[] = ['daily', 'weekly', 'monthly'];
 const nextFrequency = (f: Frequency): Frequency =>
   FREQUENCIES[(FREQUENCIES.indexOf(f) + 1) % FREQUENCIES.length];
 
-// Icons are keyed by component id so a renamed pocket keeps its icon.
-// New (user-created) pockets fall back to the coin-pouch doodle.
-const iconById: Record<string, string> = {
-  c1: mealIcon,
-  c2: transportIcon,
-  c3: billsIcon,
-  c4: houseIcon,
-  c5: dumbbellIcon,
-};
-const iconFor = (id: string) => iconById[id] ?? pocketIcon;
-
 const newId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
     ? crypto.randomUUID()
     : String(Math.random()).slice(2);
+
+const DEFAULT_INCOME = 7_000_000;
 
 const initialPreset: Preset = {
   id: 'sample',
@@ -44,6 +43,7 @@ const initialPreset: Preset = {
     {
       id: 'c1',
       name: 'Daily meals',
+      icon: 'meal',
       items: [
         { id: 'i1', name: 'Lunch & dinner', amount: 60_000, frequency: 'daily' },
         { id: 'i2', name: 'Coffee', amount: 30_000, frequency: 'weekly' },
@@ -52,6 +52,7 @@ const initialPreset: Preset = {
     {
       id: 'c2',
       name: 'Transport',
+      icon: 'transport',
       items: [
         { id: 'i3', name: 'Fuel', amount: 50_000, frequency: 'weekly' },
         { id: 'i4', name: 'Ride-hailing', amount: 35_000, frequency: 'weekly' },
@@ -60,6 +61,7 @@ const initialPreset: Preset = {
     {
       id: 'c3',
       name: 'Bills',
+      icon: 'bills',
       items: [
         { id: 'i5', name: 'Electricity', amount: 300_000, frequency: 'monthly' },
         { id: 'i6', name: 'Internet', amount: 350_000, frequency: 'monthly' },
@@ -69,6 +71,7 @@ const initialPreset: Preset = {
     {
       id: 'c4',
       name: 'Rent',
+      icon: 'house',
       items: [
         { id: 'i8', name: 'Boarding house', amount: 2_000_000, frequency: 'monthly' },
       ],
@@ -76,10 +79,16 @@ const initialPreset: Preset = {
     {
       id: 'c5',
       name: 'Gym',
+      icon: 'dumbbell',
       items: [{ id: 'i9', name: 'Membership', amount: 200_000, frequency: 'monthly' }],
     },
   ],
 };
+
+function currentMonth(): TargetMonth {
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() + 1 };
+}
 
 function monthLabel(m: TargetMonth): string {
   return new Date(m.year, m.month - 1, 1).toLocaleDateString('en-US', {
@@ -130,9 +139,56 @@ function FreqPill({
   );
 }
 
+function IconPicker({
+  current,
+  open,
+  onToggle,
+  onSelect,
+}: {
+  current: IconKey | undefined;
+  open: boolean;
+  onToggle: () => void;
+  onSelect: (key: IconKey) => void;
+}) {
+  return (
+    <div className="icon-wrap">
+      <button
+        type="button"
+        className="icon-btn"
+        onClick={onToggle}
+        aria-label="change icon"
+        title="change icon"
+      >
+        <img src={iconSrc(current)} alt="" />
+      </button>
+      {open && (
+        <>
+          <div className="backdrop" onClick={onToggle} />
+          <div className="icon-pop" role="menu">
+            {ICONS.map((i) => (
+              <button
+                key={i.key}
+                type="button"
+                className={`icon-choice ${i.key === current ? 'sel' : ''}`}
+                onClick={() => onSelect(i.key)}
+                aria-label={i.key}
+              >
+                <img src={i.src} alt={i.key} />
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 interface CardProps {
   component: Component;
   month: TargetMonth;
+  pickerOpen: boolean;
+  onTogglePicker: () => void;
+  onSelectIcon: (key: IconKey) => void;
   onPatchComponent: (patch: Partial<Component>) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onAddItem: () => void;
@@ -143,13 +199,23 @@ interface CardProps {
 function ComponentCard({
   component,
   month,
+  pickerOpen,
+  onTogglePicker,
+  onSelectIcon,
   onPatchComponent,
   onPatchItem,
   onAddItem,
   onDeleteItem,
   onDeleteComponent,
 }: CardProps) {
-  const icon = iconFor(component.id);
+  const picker = (
+    <IconPicker
+      current={component.icon}
+      open={pickerOpen}
+      onToggle={onTogglePicker}
+      onSelect={onSelectIcon}
+    />
+  );
   const nameField = (
     <input
       className="name-input"
@@ -165,7 +231,7 @@ function ComponentCard({
     return (
       <div className="card solo">
         <div className="solo-row">
-          <img src={icon} alt="" style={{ width: 34, height: 34, flex: 'none' }} />
+          {picker}
           {nameField}
           <FreqPill
             frequency={it.frequency}
@@ -192,7 +258,7 @@ function ComponentCard({
     <div className="card">
       <div className="comp-head">
         <div className="comp-title">
-          <img src={icon} alt="" />
+          {picker}
           {nameField}
         </div>
         <span className="comp-total">{rp(componentTotal(component, month))}</span>
@@ -243,9 +309,20 @@ function ComponentCard({
 }
 
 function App() {
-  const [month, setMonth] = useState<TargetMonth>({ year: 2026, month: 8 });
-  const [income, setIncome] = useState(7_000_000);
-  const [preset, setPreset] = useState<Preset>(initialPreset);
+  const [month, setMonth] = useState<TargetMonth>(currentMonth);
+  const [preset, setPreset] = useState<Preset>(
+    () => loadState()?.preset ?? initialPreset,
+  );
+  const [income, setIncome] = useState<number>(
+    () => loadState()?.income ?? DEFAULT_INCOME,
+  );
+  const [openPicker, setOpenPicker] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  // Auto-save to localStorage on every change — no button, no server.
+  useEffect(() => {
+    saveState({ preset, income });
+  }, [preset, income]);
 
   const total = useMemo(() => monthlyTotal(preset, month), [preset, month]);
   const rem = remaining(total, income);
@@ -260,12 +337,7 @@ function App() {
   const patchItem = (compId: string, itemId: string, patch: Partial<Item>) =>
     mapComponents((c) =>
       c.id === compId
-        ? {
-            ...c,
-            items: c.items.map((it) =>
-              it.id === itemId ? { ...it, ...patch } : it,
-            ),
-          }
+        ? { ...c, items: c.items.map((it) => (it.id === itemId ? { ...it, ...patch } : it)) }
         : c,
     );
 
@@ -284,9 +356,7 @@ function App() {
 
   const deleteItem = (compId: string, itemId: string) =>
     mapComponents((c) =>
-      c.id === compId
-        ? { ...c, items: c.items.filter((it) => it.id !== itemId) }
-        : c,
+      c.id === compId ? { ...c, items: c.items.filter((it) => it.id !== itemId) } : c,
     );
 
   const deleteComponent = (compId: string) =>
@@ -307,6 +377,16 @@ function App() {
         },
       ],
     }));
+
+  const handleImport = async (file: File) => {
+    try {
+      const state = parseImportedFile(await file.text());
+      setPreset(state.preset);
+      setIncome(state.income);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Could not read that file.');
+    }
+  };
 
   return (
     <div className="app">
@@ -336,7 +416,7 @@ function App() {
 
       {preset.components.length === 0 ? (
         <div className="empty">
-          <img src={pocketIcon} alt="" />
+          <img src={iconSrc('pocket')} alt="" />
           <p>no pockets yet — add your first one!</p>
         </div>
       ) : (
@@ -345,6 +425,12 @@ function App() {
             key={c.id}
             component={c}
             month={month}
+            pickerOpen={openPicker === c.id}
+            onTogglePicker={() => setOpenPicker((cur) => (cur === c.id ? null : c.id))}
+            onSelectIcon={(key) => {
+              patchComponent(c.id, { icon: key });
+              setOpenPicker(null);
+            }}
             onPatchComponent={(patch) => patchComponent(c.id, patch)}
             onPatchItem={(itemId, patch) => patchItem(c.id, itemId, patch)}
             onAddItem={() => addItem(c.id)}
@@ -386,6 +472,29 @@ function App() {
         </div>
         <div className={`note ${positive ? 'pos' : 'neg'}`}>
           {positive ? 'surplus — free to save!' : 'shortfall — trim something!'}
+        </div>
+      </div>
+
+      <div className="toolbar">
+        <span className="save-note">saved on this device</span>
+        <div className="tools">
+          <button className="tool-btn" onClick={() => exportToFile({ preset, income })}>
+            ⬇ export
+          </button>
+          <button className="tool-btn" onClick={() => fileInput.current?.click()}>
+            ⬆ import
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImport(f);
+              e.target.value = '';
+            }}
+          />
         </div>
       </div>
     </div>
