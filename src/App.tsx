@@ -317,12 +317,21 @@ function App() {
     () => loadState()?.income ?? DEFAULT_INCOME,
   );
   const [openPicker, setOpenPicker] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   // Auto-save to localStorage on every change — no button, no server.
   useEffect(() => {
     saveState({ preset, income });
   }, [preset, income]);
+
+  // Show the pinned-header shadow only once the list scrolls under it.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const total = useMemo(() => monthlyTotal(preset, month), [preset, month]);
   const rem = remaining(total, income);
@@ -399,7 +408,7 @@ function App() {
 
   return (
     <div className="app">
-      <div className="frozen">
+      <div className={`frozen${scrolled ? ' scrolled' : ''}`}>
         <header className="header">
           <button className="wordmark" onClick={scrollToTop} title="back to top">
             Autong<span className="dot">.</span>

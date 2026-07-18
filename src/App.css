@@ -4,15 +4,32 @@
   padding: 0 20px 72px;
 }
 
-/* pinned region: wordmark + tagline + month + summary stay in view */
+/* pinned region: wordmark + tagline + month + summary stay in view.
+   Same fixed, viewport-aligned paper texture as the body, so the pinned
+   area is seamless with the page behind the scrolling list. */
 .frozen {
   position: sticky;
   top: 0;
   z-index: 10;
   margin: 0 -20px;
-  padding: 22px 20px 14px;
-  background: var(--paper);
-  box-shadow: 0 10px 14px -8px rgba(44, 42, 38, 0.35);
+  padding: 22px 20px 12px;
+  background: var(--paper) url("/paper.svg") center center / cover fixed no-repeat;
+}
+/* soft bottom-only shadow, shown only once the list scrolls under the header */
+.frozen::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 14px;
+  background: linear-gradient(rgba(44, 42, 38, 0.16), rgba(44, 42, 38, 0));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.frozen.scrolled::after {
+  opacity: 1;
 }
 
 .header { text-align: center; margin-bottom: 14px; }
