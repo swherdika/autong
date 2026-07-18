@@ -326,7 +326,16 @@ function App() {
 
   const total = useMemo(() => monthlyTotal(preset, month), [preset, month]);
   const rem = remaining(total, income);
-  const positive = rem >= 0;
+  const status = rem > 0 ? 'pos' : rem < 0 ? 'neg' : 'zero';
+  const note =
+    rem > 0
+      ? 'surplus — free to save!'
+      : rem < 0
+        ? 'shortfall — trim something!'
+        : 'bullseye — every rupiah allocated!';
+
+  const scrollToTop = () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const mapComponents = (fn: (c: Component) => Component) =>
     setPreset((p) => ({ ...p, components: p.components.map(fn) }));
@@ -390,30 +399,62 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1 className="wordmark">
-          Autong<span className="dot">.</span>
-        </h1>
-        <p className="tagline">auto-allocator for your kantong(s)</p>
-        <div className="month">
-          <button
-            className="nub"
-            aria-label="previous month"
-            onClick={() => setMonth((m) => shiftMonth(m, -1))}
-          >
-            ‹
+      <div className="frozen">
+        <header className="header">
+          <button className="wordmark" onClick={scrollToTop} title="back to top">
+            Autong<span className="dot">.</span>
           </button>
-          <span>{monthLabel(month)}</span>
-          <button
-            className="nub"
-            aria-label="next month"
-            onClick={() => setMonth((m) => shiftMonth(m, 1))}
-          >
-            ›
-          </button>
-        </div>
-      </header>
+          <p className="tagline">auto-allocator for your kantong(s)</p>
+          <div className="month">
+            <button
+              className="nub"
+              aria-label="previous month"
+              onClick={() => setMonth((m) => shiftMonth(m, -1))}
+            >
+              ‹
+            </button>
+            <span>{monthLabel(month)}</span>
+            <button
+              className="nub"
+              aria-label="next month"
+              onClick={() => setMonth((m) => shiftMonth(m, 1))}
+            >
+              ›
+            </button>
+          </div>
+        </header>
 
+        <div className="summary">
+          <div className="summary-row">
+            <div className="income">
+              <label htmlFor="income">income</label>
+              <input
+                id="income"
+                type="text"
+                inputMode="numeric"
+                value={income.toLocaleString('id-ID')}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) =>
+                  setIncome(Number(e.target.value.replace(/[^\d]/g, '')) || 0)
+                }
+              />
+            </div>
+            <div className="stats">
+              <div className="stat">
+                <div className="stat-label">total need</div>
+                <div className="stat-value">{rp(total)}</div>
+              </div>
+              <div className="stat">
+                <div className="stat-label">remaining</div>
+                <div className={`stat-value ${status}`}>{rp(rem)}</div>
+              </div>
+            </div>
+          </div>
+          <div className={`note ${status}`}>{note}</div>
+        </div>
+      </div>
+
+      <div className="list">
       {preset.components.length === 0 ? (
         <div className="empty">
           <img src={iconSrc('pocket')} alt="" />
@@ -444,37 +485,6 @@ function App() {
         + add pocket
       </button>
 
-      <div className="summary">
-        <div className="summary-row">
-          <div className="income">
-            <label htmlFor="income">income</label>
-            <input
-              id="income"
-              type="text"
-              inputMode="numeric"
-              value={income.toLocaleString('id-ID')}
-              onFocus={(e) => e.target.select()}
-              onChange={(e) =>
-                setIncome(Number(e.target.value.replace(/[^\d]/g, '')) || 0)
-              }
-            />
-          </div>
-          <div className="stats">
-            <div className="stat">
-              <div className="stat-label">total need</div>
-              <div className="stat-value">{rp(total)}</div>
-            </div>
-            <div className="stat">
-              <div className="stat-label">remaining</div>
-              <div className={`stat-value ${positive ? 'pos' : 'neg'}`}>{rp(rem)}</div>
-            </div>
-          </div>
-        </div>
-        <div className={`note ${positive ? 'pos' : 'neg'}`}>
-          {positive ? 'surplus — free to save!' : 'shortfall — trim something!'}
-        </div>
-      </div>
-
       <div className="toolbar">
         <span className="save-note">saved on this device</span>
         <div className="tools">
@@ -496,6 +506,7 @@ function App() {
             }}
           />
         </div>
+      </div>
       </div>
     </div>
   );
