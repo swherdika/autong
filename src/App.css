@@ -58,41 +58,68 @@
 .card.solo { padding: 12px 16px; }
 
 .comp-head {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  display: flex; align-items: center; gap: 10px;
 }
-.comp-title { display: flex; align-items: center; gap: 10px; }
-.comp-title img { width: 34px; height: 34px; display: block; }
-.comp-title .name { font-family: var(--font-hand); font-size: 22px; line-height: 1; }
-.comp-total { font-weight: 700; font-size: 18px; }
+.comp-title { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.comp-title img { width: 34px; height: 34px; display: block; flex: none; }
+.comp-total { font-weight: 700; font-size: 18px; white-space: nowrap; }
 
 .items { margin-top: 8px; }
 .item {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  display: flex; align-items: center; gap: 10px;
   padding: 9px 0; border-top: 2px dashed var(--paper-2);
 }
-.item-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.item-name { font-size: 15px; }
-.item-right { display: flex; align-items: center; gap: 12px; }
-.item-calc { font-family: var(--font-hand); font-size: 14px; color: var(--ink-muted); }
-.item-need { font-weight: 700; font-size: 15px; min-width: 108px; text-align: right; }
+.item-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.item-right { display: flex; align-items: center; gap: 10px; }
+.item-calc { font-family: var(--font-hand); font-size: 14px; color: var(--ink-muted); white-space: nowrap; }
+.item-need { font-weight: 700; font-size: 15px; min-width: 96px; text-align: right; white-space: nowrap; }
 
-.solo-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+.solo-row { display: flex; align-items: center; gap: 10px; }
+
+/* editable fields — blend into the paper, dashed underline on focus */
+.name-input {
+  font-family: var(--font-hand); font-size: 22px; line-height: 1.1;
+  background: transparent; border: none; color: var(--ink);
+  flex: 1; min-width: 40px; width: 100%;
+  border-bottom: 2px dashed transparent; padding: 1px 2px;
 }
-.solo-calc { font-family: var(--font-hand); font-size: 14px; color: var(--ink-muted); margin-right: 4px; }
+.name-input:focus { outline: none; border-bottom-color: var(--ink-muted); }
+.item-name-input {
+  font-family: var(--font-body); font-size: 15px;
+  background: transparent; border: none; color: var(--ink);
+  flex: 1; min-width: 40px; width: 100%;
+  border-bottom: 2px dashed transparent; padding: 1px 2px;
+}
+.item-name-input:focus { outline: none; border-bottom-color: var(--ink-muted); }
+.amount-input {
+  font-family: var(--font-body); font-weight: 700; font-size: 15px; text-align: right;
+  background: transparent; border: none; color: var(--ink); width: 96px;
+  border-bottom: 2px dashed transparent; padding: 1px 2px;
+}
+.amount-input:focus { outline: none; border-bottom-color: var(--ink-muted); }
 
 .pill {
   font-family: var(--font-hand); font-size: 14px; line-height: 1;
   padding: 3px 10px; border-radius: 40px; border: 2px solid var(--line);
-  transform: rotate(-2deg); display: inline-block;
+  transform: rotate(-2deg); display: inline-block; white-space: nowrap;
 }
 .pill.daily { background: var(--daily-bg); color: var(--daily-fg); }
 .pill.weekly { background: var(--weekly-bg); color: var(--weekly-fg); transform: rotate(2deg); }
 .pill.monthly { background: var(--monthly-bg); color: var(--monthly-fg); }
+button.pill { cursor: pointer; }
+button.pill:hover { filter: brightness(0.96); }
+button.pill:active { transform: rotate(0deg) translateY(1px); }
+
+.del {
+  font-family: var(--font-body); font-weight: 700; font-size: 16px; line-height: 1;
+  color: var(--ink-muted); background: none; border: none; cursor: pointer;
+  padding: 3px 6px; border-radius: 50%; flex: none;
+}
+.del:hover { color: var(--danger); background: var(--paper-2); }
 
 .add-item {
   font-family: var(--font-hand); font-size: 15px; color: var(--ink-soft);
-  background: none; border: none; cursor: pointer; padding: 6px 2px 0; margin-top: 4px;
+  background: none; border: none; cursor: pointer; padding: 8px 2px 0; margin-top: 2px;
 }
 .add-item:hover { color: var(--coral); }
 
@@ -102,6 +129,14 @@
   padding: 12px; cursor: pointer; margin-top: 2px;
 }
 .add-comp:hover { background: var(--paper-2); color: var(--ink); }
+
+.empty {
+  text-align: center; padding: 36px 20px;
+  border: 2.5px dashed var(--line); border-radius: 18px; background: var(--card);
+  margin-bottom: 18px;
+}
+.empty img { width: 72px; height: 72px; }
+.empty p { font-family: var(--font-hand); font-size: 20px; color: var(--ink-soft); margin: 10px 0 0; }
 
 .summary {
   background: var(--card); border: 2.5px solid var(--line);

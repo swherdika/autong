@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { Component, Frequency, Preset, TargetMonth } from './types/budget';
+import type { Component, Frequency, Item, Preset, TargetMonth } from './types/budget';
 import {
   componentTotal,
   itemNeed,
@@ -12,19 +12,32 @@ import transportIcon from './assets/icons/transport.svg';
 import billsIcon from './assets/icons/bills.svg';
 import houseIcon from './assets/icons/house.svg';
 import dumbbellIcon from './assets/icons/dumbbell.svg';
+import pocketIcon from './assets/icons/pocket.svg';
 import './App.css';
 
 const rp = (n: number) => 'Rp' + Math.round(n).toLocaleString('id-ID');
 
-const compIcon: Record<string, string> = {
-  'Daily meals': mealIcon,
-  Transport: transportIcon,
-  Bills: billsIcon,
-  Rent: houseIcon,
-  Gym: dumbbellIcon,
-};
+const FREQUENCIES: Frequency[] = ['daily', 'weekly', 'monthly'];
+const nextFrequency = (f: Frequency): Frequency =>
+  FREQUENCIES[(FREQUENCIES.indexOf(f) + 1) % FREQUENCIES.length];
 
-const samplePreset: Preset = {
+// Icons are keyed by component id so a renamed pocket keeps its icon.
+// New (user-created) pockets fall back to the coin-pouch doodle.
+const iconById: Record<string, string> = {
+  c1: mealIcon,
+  c2: transportIcon,
+  c3: billsIcon,
+  c4: houseIcon,
+  c5: dumbbellIcon,
+};
+const iconFor = (id: string) => iconById[id] ?? pocketIcon;
+
+const newId = () =>
+  typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : String(Math.random()).slice(2);
+
+const initialPreset: Preset = {
   id: 'sample',
   name: 'My Budget',
   components: [
@@ -63,9 +76,7 @@ const samplePreset: Preset = {
     {
       id: 'c5',
       name: 'Gym',
-      items: [
-        { id: 'i9', name: 'Membership', amount: 200_000, frequency: 'monthly' },
-      ],
+      items: [{ id: 'i9', name: 'Membership', amount: 200_000, frequency: 'monthly' }],
     },
   ],
 };
@@ -82,31 +93,97 @@ function shiftMonth(m: TargetMonth, delta: number): TargetMonth {
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
 }
 
-function Pill({ frequency }: { frequency: Frequency }) {
-  return <span className={`pill ${frequency}`}>{frequency}</span>;
+function AmountInput({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+}) {
+  return (
+    <input
+      className="amount-input"
+      inputMode="numeric"
+      value={value.toLocaleString('id-ID')}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => onChange(Number(e.target.value.replace(/[^\d]/g, '')) || 0)}
+    />
+  );
 }
 
-function ComponentCard({ c, month }: { c: Component; month: TargetMonth }) {
-  const icon = compIcon[c.name];
+function FreqPill({
+  frequency,
+  onCycle,
+}: {
+  frequency: Frequency;
+  onCycle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`pill ${frequency}`}
+      onClick={onCycle}
+      title="tap to change frequency"
+    >
+      {frequency}
+    </button>
+  );
+}
 
-  // One item → collapse to a single one-liner row instead of a list.
-  if (c.items.length === 1) {
-    const it = c.items[0];
+interface CardProps {
+  component: Component;
+  month: TargetMonth;
+  onPatchComponent: (patch: Partial<Component>) => void;
+  onPatchItem: (itemId: string, patch: Partial<Item>) => void;
+  onAddItem: () => void;
+  onDeleteItem: (itemId: string) => void;
+  onDeleteComponent: () => void;
+}
+
+function ComponentCard({
+  component,
+  month,
+  onPatchComponent,
+  onPatchItem,
+  onAddItem,
+  onDeleteItem,
+  onDeleteComponent,
+}: CardProps) {
+  const icon = iconFor(component.id);
+  const nameField = (
+    <input
+      className="name-input"
+      value={component.name}
+      placeholder="pocket name"
+      onChange={(e) => onPatchComponent({ name: e.target.value })}
+    />
+  );
+
+  // Single item → compact one-liner. The pocket name stands in for the item.
+  if (component.items.length === 1) {
+    const it = component.items[0];
     return (
       <div className="card solo">
         <div className="solo-row">
-          <div className="comp-title">
-            {icon && <img src={icon} alt="" />}
-            <span className="name">{c.name}</span>
-            <Pill frequency={it.frequency} />
-          </div>
-          <div className="item-right">
-            <span className="solo-calc">
-              {rp(it.amount)} × {occurrences(it.frequency, month)}
-            </span>
-            <span className="comp-total">{rp(itemNeed(it, month))}</span>
-          </div>
+          <img src={icon} alt="" style={{ width: 34, height: 34, flex: 'none' }} />
+          {nameField}
+          <FreqPill
+            frequency={it.frequency}
+            onCycle={() => onPatchItem(it.id, { frequency: nextFrequency(it.frequency) })}
+          />
+          <AmountInput
+            value={it.amount}
+            onChange={(amount) => onPatchItem(it.id, { amount })}
+          />
+          <span className="item-calc">× {occurrences(it.frequency, month)}</span>
+          <span className="comp-total">{rp(itemNeed(it, month))}</span>
+          <button className="del" aria-label="delete pocket" onClick={onDeleteComponent}>
+            ✕
+          </button>
         </div>
+        <button className="add-item" onClick={onAddItem}>
+          + add item
+        </button>
       </div>
     );
   }
@@ -115,28 +192,52 @@ function ComponentCard({ c, month }: { c: Component; month: TargetMonth }) {
     <div className="card">
       <div className="comp-head">
         <div className="comp-title">
-          {icon && <img src={icon} alt="" />}
-          <span className="name">{c.name}</span>
+          <img src={icon} alt="" />
+          {nameField}
         </div>
-        <div className="comp-total">{rp(componentTotal(c, month))}</div>
+        <span className="comp-total">{rp(componentTotal(component, month))}</span>
+        <button className="del" aria-label="delete pocket" onClick={onDeleteComponent}>
+          ✕
+        </button>
       </div>
       <div className="items">
-        {c.items.map((it) => (
+        {component.items.map((it) => (
           <div className="item" key={it.id}>
             <div className="item-left">
-              <span className="item-name">{it.name}</span>
-              <Pill frequency={it.frequency} />
+              <input
+                className="item-name-input"
+                value={it.name}
+                placeholder="item name"
+                onChange={(e) => onPatchItem(it.id, { name: e.target.value })}
+              />
+              <FreqPill
+                frequency={it.frequency}
+                onCycle={() =>
+                  onPatchItem(it.id, { frequency: nextFrequency(it.frequency) })
+                }
+              />
             </div>
             <div className="item-right">
-              <span className="item-calc">
-                {rp(it.amount)} × {occurrences(it.frequency, month)}
-              </span>
+              <AmountInput
+                value={it.amount}
+                onChange={(amount) => onPatchItem(it.id, { amount })}
+              />
+              <span className="item-calc">× {occurrences(it.frequency, month)}</span>
               <span className="item-need">{rp(itemNeed(it, month))}</span>
+              <button
+                className="del"
+                aria-label="delete item"
+                onClick={() => onDeleteItem(it.id)}
+              >
+                ✕
+              </button>
             </div>
           </div>
         ))}
       </div>
-      <button className="add-item">+ add item</button>
+      <button className="add-item" onClick={onAddItem}>
+        + add item
+      </button>
     </div>
   );
 }
@@ -144,10 +245,68 @@ function ComponentCard({ c, month }: { c: Component; month: TargetMonth }) {
 function App() {
   const [month, setMonth] = useState<TargetMonth>({ year: 2026, month: 8 });
   const [income, setIncome] = useState(7_000_000);
+  const [preset, setPreset] = useState<Preset>(initialPreset);
 
-  const total = useMemo(() => monthlyTotal(samplePreset, month), [month]);
+  const total = useMemo(() => monthlyTotal(preset, month), [preset, month]);
   const rem = remaining(total, income);
   const positive = rem >= 0;
+
+  const mapComponents = (fn: (c: Component) => Component) =>
+    setPreset((p) => ({ ...p, components: p.components.map(fn) }));
+
+  const patchComponent = (id: string, patch: Partial<Component>) =>
+    mapComponents((c) => (c.id === id ? { ...c, ...patch } : c));
+
+  const patchItem = (compId: string, itemId: string, patch: Partial<Item>) =>
+    mapComponents((c) =>
+      c.id === compId
+        ? {
+            ...c,
+            items: c.items.map((it) =>
+              it.id === itemId ? { ...it, ...patch } : it,
+            ),
+          }
+        : c,
+    );
+
+  const addItem = (compId: string) =>
+    mapComponents((c) =>
+      c.id === compId
+        ? {
+            ...c,
+            items: [
+              ...c.items,
+              { id: newId(), name: '', amount: 0, frequency: 'monthly' },
+            ],
+          }
+        : c,
+    );
+
+  const deleteItem = (compId: string, itemId: string) =>
+    mapComponents((c) =>
+      c.id === compId
+        ? { ...c, items: c.items.filter((it) => it.id !== itemId) }
+        : c,
+    );
+
+  const deleteComponent = (compId: string) =>
+    setPreset((p) => ({
+      ...p,
+      components: p.components.filter((c) => c.id !== compId),
+    }));
+
+  const addComponent = () =>
+    setPreset((p) => ({
+      ...p,
+      components: [
+        ...p.components,
+        {
+          id: newId(),
+          name: '',
+          items: [{ id: newId(), name: '', amount: 0, frequency: 'monthly' }],
+        },
+      ],
+    }));
 
   return (
     <div className="app">
@@ -175,11 +334,29 @@ function App() {
         </div>
       </header>
 
-      {samplePreset.components.map((c) => (
-        <ComponentCard key={c.id} c={c} month={month} />
-      ))}
+      {preset.components.length === 0 ? (
+        <div className="empty">
+          <img src={pocketIcon} alt="" />
+          <p>no pockets yet — add your first one!</p>
+        </div>
+      ) : (
+        preset.components.map((c) => (
+          <ComponentCard
+            key={c.id}
+            component={c}
+            month={month}
+            onPatchComponent={(patch) => patchComponent(c.id, patch)}
+            onPatchItem={(itemId, patch) => patchItem(c.id, itemId, patch)}
+            onAddItem={() => addItem(c.id)}
+            onDeleteItem={(itemId) => deleteItem(c.id, itemId)}
+            onDeleteComponent={() => deleteComponent(c.id)}
+          />
+        ))
+      )}
 
-      <button className="add-comp">+ add component</button>
+      <button className="add-comp" onClick={addComponent}>
+        + add pocket
+      </button>
 
       <div className="summary">
         <div className="summary-row">
@@ -190,6 +367,7 @@ function App() {
               type="text"
               inputMode="numeric"
               value={income.toLocaleString('id-ID')}
+              onFocus={(e) => e.target.select()}
               onChange={(e) =>
                 setIncome(Number(e.target.value.replace(/[^\d]/g, '')) || 0)
               }
@@ -202,9 +380,7 @@ function App() {
             </div>
             <div className="stat">
               <div className="stat-label">remaining</div>
-              <div className={`stat-value ${positive ? 'pos' : 'neg'}`}>
-                {rp(rem)}
-              </div>
+              <div className={`stat-value ${positive ? 'pos' : 'neg'}`}>{rp(rem)}</div>
             </div>
           </div>
         </div>
