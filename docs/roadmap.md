@@ -40,15 +40,18 @@ Stop re-typing your budget every payday. No backend, no database.
 
 ## M4 — Polish & cross-platform reach
 
+**v1.0.0 shipped 2026-07-19 — first complete release: web + desktop, no stores.**
+
 - [x] Responsive layout / mobile-friendly UI
-- [x] PWA (installable) — the cheapest path to "it's on my phone" (covers
-      Android + desktop-Chrome install today; limited on iOS)
-- [ ] Native shells over the same engine — the real goal: installable on
-      desktop, iOS, and Android:
-  - [x] Desktop (Tauri) — Windows MSI + NSIS installers built in CI
-        (`desktop-windows` job); mac/Linux runners can be added to the matrix
-  - [ ] Android (Capacitor) — buildable on this Windows machine
-  - [ ] iOS (Capacitor) — needs macOS + Xcode (a Mac or a CI mac runner)
+- [x] PWA (installable) — the cheapest path to "it's on my phone"
+- [x] Web deployed to GitHub Pages — live at
+      https://swherdika.github.io/autong/ (installable PWA, `deploy-pages.yml`)
+- [x] Desktop (Tauri) — Windows / macOS (universal) / Linux installers built
+      by `release.yml` on a version tag, published as a GitHub Release
+- [ ] _Deferred (post-v1):_ Android (Capacitor, buildable on Windows) and
+      iOS (Capacitor; needs a CI macOS runner + paid Apple signing)
+- [ ] _Deferred:_ code signing for Windows/macOS to drop the unsigned
+      SmartScreen / Gatekeeper warnings (paid certs)
 
 ## M5 — Reporting
 
