@@ -2,12 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#efe2c4" />
     <meta name="description" content="Plan how each payroll splits across your pockets. Local-only, no account." />
+    <!-- Paper texture URL must respect the base path (differs for Pages vs
+         Tauri), so it's set here where Vite substitutes %BASE_URL% at build. -->
+    <style>:root { --paper-url: url("%BASE_URL%paper.svg"); }</style>
     <!-- iOS home-screen / standalone: Apple ignores the web manifest -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Autong" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />

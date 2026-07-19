@@ -13,7 +13,7 @@
   z-index: 10;
   margin: 0 -20px;
   padding: 22px 20px 12px;
-  background: var(--paper) url("/paper.svg") center center / cover fixed no-repeat;
+  background: var(--paper) var(--paper-url) center center / cover fixed no-repeat;
 }
 /* soft bottom-only shadow, shown only once the list scrolls under the header */
 .frozen::after {
