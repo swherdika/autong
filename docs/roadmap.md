@@ -40,8 +40,8 @@ Stop re-typing your budget every payday. No backend, no database.
 
 ## M4 — Polish & cross-platform reach
 
-- [ ] Responsive layout / mobile-friendly UI
-- [ ] PWA (installable) — the cheapest path to "it's on my phone"
+- [x] Responsive layout / mobile-friendly UI
+- [x] PWA (installable) — the cheapest path to "it's on my phone"
 - [ ] Later: React Native or desktop (Tauri) shell over the same engine
 
 ## M5 — Reporting
