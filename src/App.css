@@ -108,6 +108,8 @@
 .item-need { font-weight: 700; font-size: 15px; min-width: 96px; text-align: right; white-space: nowrap; }
 
 .solo-row { display: flex; align-items: center; gap: 10px; }
+.solo-id { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.solo-val { display: flex; align-items: center; gap: 10px; flex: none; }
 
 /* editable fields — blend into the paper, dashed underline on focus */
 .name-input {
@@ -245,3 +247,29 @@ button.pill:active { transform: rotate(0deg) translateY(1px); }
 .note.pos { color: var(--success); }
 .note.neg { color: var(--danger); }
 .note.zero { color: var(--gold); }
+
+/* ── Narrow screens: phones. The desktop one-liner rows can't fit six
+   controls at ~340px, so identity (name + pill) sits on top and the
+   money values (amount · ×N · need · ✕) right-align on a second line. */
+@media (max-width: 520px) {
+  .app { padding: 0 14px 56px; }
+  .frozen { margin: 0 -14px; padding: 18px 14px 10px; }
+
+  .wordmark { font-size: 36px; }
+  .tagline { font-size: 16px; }
+
+  /* multi-item rows */
+  .item { flex-wrap: wrap; gap: 6px 10px; }
+  .item-left { flex: 1 1 100%; }
+  .item-right { flex: 1 1 100%; justify-content: flex-end; }
+
+  /* solo (single-item) pockets */
+  .solo-row { flex-wrap: wrap; gap: 8px 10px; }
+  .solo-id { flex: 1 1 100%; }
+  .solo-val { flex: 1 1 100%; justify-content: flex-end; }
+
+  /* summary: income on its own line, the two stats spread edge-to-edge */
+  .income { width: 100%; }
+  .income input { flex: 1; width: auto; }
+  .stats { width: 100%; justify-content: space-between; gap: 16px; }
+}

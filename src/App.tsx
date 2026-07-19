@@ -231,21 +231,25 @@ function ComponentCard({
     return (
       <div className="card solo">
         <div className="solo-row">
-          {picker}
-          {nameField}
-          <FreqPill
-            frequency={it.frequency}
-            onCycle={() => onPatchItem(it.id, { frequency: nextFrequency(it.frequency) })}
-          />
-          <AmountInput
-            value={it.amount}
-            onChange={(amount) => onPatchItem(it.id, { amount })}
-          />
-          <span className="item-calc">× {occurrences(it.frequency, month)}</span>
-          <span className="comp-total">{rp(itemNeed(it, month))}</span>
-          <button className="del" aria-label="delete pocket" onClick={onDeleteComponent}>
-            ✕
-          </button>
+          <div className="solo-id">
+            {picker}
+            {nameField}
+            <FreqPill
+              frequency={it.frequency}
+              onCycle={() => onPatchItem(it.id, { frequency: nextFrequency(it.frequency) })}
+            />
+          </div>
+          <div className="solo-val">
+            <AmountInput
+              value={it.amount}
+              onChange={(amount) => onPatchItem(it.id, { amount })}
+            />
+            <span className="item-calc">× {occurrences(it.frequency, month)}</span>
+            <span className="comp-total">{rp(itemNeed(it, month))}</span>
+            <button className="del" aria-label="delete pocket" onClick={onDeleteComponent}>
+              ✕
+            </button>
+          </div>
         </div>
         <button className="add-item" onClick={onAddItem}>
           + add item

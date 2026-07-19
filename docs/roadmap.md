@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-07-18_
+_Last updated: 2026-07-19_
 
 Milestones roughly in order. Each builds on the last; scope intentionally starts
 tiny and grows.
@@ -19,14 +19,14 @@ The brain, before any UI.
 - [x] `occurrences`, `itemNeed`, `componentTotal`, `monthlyTotal`, `remaining`
 - [x] Vitest unit tests (20), incl. month-length and weekly-`ceil` edge cases
 
-## M2 — Minimal planner UI
+## M2 — Minimal planner UI ✅
 
 The first thing you can actually use in a browser.
 
-- [ ] Add / edit / remove components and items
-- [ ] Live per-component totals and monthly grand total
-- [ ] Income input → remaining (surplus / shortfall) display
-- [ ] Rupiah formatting
+- [x] Add / edit / remove components and items
+- [x] Live per-component totals and monthly grand total
+- [x] Income input → remaining (surplus / shortfall) display
+- [x] Rupiah formatting
 
 ## M3 — Persistence (local-only) ✅
 
