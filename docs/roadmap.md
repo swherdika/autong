@@ -41,8 +41,13 @@ Stop re-typing your budget every payday. No backend, no database.
 ## M4 — Polish & cross-platform reach
 
 - [x] Responsive layout / mobile-friendly UI
-- [x] PWA (installable) — the cheapest path to "it's on my phone"
-- [ ] Later: React Native or desktop (Tauri) shell over the same engine
+- [x] PWA (installable) — the cheapest path to "it's on my phone" (covers
+      Android + desktop-Chrome install today; limited on iOS)
+- [ ] Native shells over the same engine — the real goal: installable on
+      desktop, iOS, and Android:
+  - [ ] Desktop (Tauri) — Windows buildable locally; mac/Linux need CI
+  - [ ] Android (Capacitor) — buildable on this Windows machine
+  - [ ] iOS (Capacitor) — needs macOS + Xcode (a Mac or a CI mac runner)
 
 ## M5 — Reporting
 
