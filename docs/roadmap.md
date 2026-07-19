@@ -45,7 +45,8 @@ Stop re-typing your budget every payday. No backend, no database.
       Android + desktop-Chrome install today; limited on iOS)
 - [ ] Native shells over the same engine — the real goal: installable on
       desktop, iOS, and Android:
-  - [ ] Desktop (Tauri) — Windows buildable locally; mac/Linux need CI
+  - [x] Desktop (Tauri) — Windows MSI + NSIS installers built in CI
+        (`desktop-windows` job); mac/Linux runners can be added to the matrix
   - [ ] Android (Capacitor) — buildable on this Windows machine
   - [ ] iOS (Capacitor) — needs macOS + Xcode (a Mac or a CI mac runner)
 
