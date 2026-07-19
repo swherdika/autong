@@ -18,9 +18,12 @@ import { ICONS, iconSrc } from './icons';
 import {
   exportToFile,
   loadState,
+  loadTheme,
   parseImportedFile,
   saveState,
+  saveTheme,
 } from './storage';
+import { THEMES, type ThemeKey } from './themes';
 import './App.css';
 
 const rp = (n: number) => 'Rp' + Math.round(n).toLocaleString('id-ID');
@@ -183,6 +186,50 @@ function IconPicker({
   );
 }
 
+function ThemePicker({
+  theme,
+  open,
+  onToggle,
+  onSelect,
+}: {
+  theme: ThemeKey;
+  open: boolean;
+  onToggle: () => void;
+  onSelect: (key: ThemeKey) => void;
+}) {
+  const current = THEMES.find((t) => t.key === theme) ?? THEMES[0];
+  return (
+    <div className="theme-wrap">
+      <button
+        type="button"
+        className="theme-btn"
+        style={{ background: current.swatch }}
+        onClick={onToggle}
+        aria-label="change color theme"
+        title="color theme"
+      />
+      {open && (
+        <>
+          <div className="backdrop" onClick={onToggle} />
+          <div className="theme-pop" role="menu">
+            {THEMES.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                className={`theme-choice ${t.key === theme ? 'sel' : ''}`}
+                onClick={() => onSelect(t.key)}
+              >
+                <span className="theme-dot" style={{ background: t.swatch }} />
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 interface CardProps {
   component: Component;
   month: TargetMonth;
@@ -321,6 +368,8 @@ function App() {
     () => loadState()?.income ?? DEFAULT_INCOME,
   );
   const [openPicker, setOpenPicker] = useState<string | null>(null);
+  const [theme, setTheme] = useState<ThemeKey>(() => loadTheme());
+  const [themeOpen, setThemeOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -328,6 +377,12 @@ function App() {
   useEffect(() => {
     saveState({ preset, income });
   }, [preset, income]);
+
+  // Apply the colour theme to <html> and remember it.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    saveTheme(theme);
+  }, [theme]);
 
   // Show the pinned-header shadow only once the list scrolls under it.
   useEffect(() => {
@@ -501,6 +556,15 @@ function App() {
       <div className="toolbar">
         <span className="save-note">saved on this device</span>
         <div className="tools">
+          <ThemePicker
+            theme={theme}
+            open={themeOpen}
+            onToggle={() => setThemeOpen((o) => !o)}
+            onSelect={(key) => {
+              setTheme(key);
+              setThemeOpen(false);
+            }}
+          />
           <button className="tool-btn" onClick={() => exportToFile({ preset, income })}>
             ⬇ export
           </button>

@@ -9,6 +9,16 @@
     <!-- Paper texture URL must respect the base path (differs for Pages vs
          Tauri), so it's set here where Vite substitutes %BASE_URL% at build. -->
     <style>:root { --paper-url: url("%BASE_URL%paper.svg"); }</style>
+    <!-- Apply the saved colour theme before first paint to avoid a flash of
+         the default palette. React re-applies (validated) on mount. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('autong.theme');
+          if (t) document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
     <!-- iOS home-screen / standalone: Apple ignores the web manifest -->
     <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />

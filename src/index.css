@@ -1,13 +1,5 @@
 :root {
-  --paper: #efe2c4;
-  --paper-2: #e7d7b3;
-  --card: #fbf5e6;
-  --ink: #2c2a26;
-  --ink-soft: #6f6350;
-  --ink-muted: #a1937b;
-  --line: #2c2a26;
-
-  --coral: #e24b4a;
+  /* ── Shared tokens (identical across every theme) ── */
   --mustard: #ef9f27;
   --teal: #1d9e75;
 
@@ -22,6 +14,20 @@
   --font-body: "Comic Neue", system-ui, sans-serif;
   --font-hand: "Patrick Hand", "Comic Neue", cursive;
 
+  /* ── Default palette: Cream. Other palettes live in the [data-theme]
+     blocks below and are applied via a data-theme attribute on <html>.
+     The paper texture (paper.svg) is colour-neutral (white base); the palette
+     colour is multiplied under it via background-blend-mode, so a single
+     texture themes to any hue. ── */
+  --paper: #f0e3c6;
+  --paper-2: #e7d7b3;
+  --card: #fbf5e6;
+  --ink: #2c2a26;
+  --ink-soft: #6f6350;
+  --ink-muted: #a1937b;
+  --line: #2c2a26;
+  --coral: #e24b4a;
+
   color-scheme: light;
   font-family: var(--font-body);
   font-size: 16px;
@@ -30,10 +36,54 @@
   -webkit-font-smoothing: antialiased;
 }
 
+:root[data-theme="rose"] {
+  --paper: #f4d6de;
+  --paper-2: #ecc2ce;
+  --card: #fdeef2;
+  --ink: #33262b;
+  --ink-soft: #7c5763;
+  --ink-muted: #bd97a4;
+  --line: #33262b;
+  --coral: #d84a6b;
+}
+
+:root[data-theme="mint"] {
+  --paper: #d9ecdb;
+  --paper-2: #c2ddc6;
+  --card: #eef8ef;
+  --ink: #24302a;
+  --ink-soft: #5b6f62;
+  --ink-muted: #97a99b;
+  --line: #24302a;
+  --coral: #e0663f;
+}
+
+:root[data-theme="sky"] {
+  --paper: #d8e6f2;
+  --paper-2: #c1d5ea;
+  --card: #eef4fb;
+  --ink: #232b34;
+  --ink-soft: #566472;
+  --ink-muted: #94a3b4;
+  --line: #232b34;
+  --coral: #ef8140;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--paper) var(--paper-url) center center / cover fixed no-repeat;
+  color: var(--ink);
+  /* solid palette colour, tinted by the neutral paper texture on top */
+  background-color: var(--paper);
+  background-image: var(--paper-url);
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
+  /* No transition on background-color: it reads var(--paper), and Chromium
+     leaves a var()-driven transitioned colour stuck at its old value. The
+     theme snaps instantly instead (like the cards), which is fine. */
 }

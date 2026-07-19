@@ -13,7 +13,13 @@
   z-index: 10;
   margin: 0 -20px;
   padding: 22px 20px 12px;
-  background: var(--paper) var(--paper-url) center center / cover fixed no-repeat;
+  background-color: var(--paper);
+  background-image: var(--paper-url);
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
 }
 /* soft bottom-only shadow, shown only once the list scrolls under the header */
 .frozen::after {
@@ -212,6 +218,34 @@ button.pill:active { transform: rotate(0deg) translateY(1px); }
 }
 .tool-btn:hover { background: var(--paper-2); color: var(--ink); }
 .tool-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+
+/* palette / theme picker — a swatch button that opens a popover of themes */
+.theme-wrap { position: relative; display: flex; }
+.theme-btn {
+  width: 32px; height: 32px; border-radius: 50%; padding: 0; cursor: pointer;
+  border: 2.5px solid var(--line); box-shadow: 2px 2px 0 var(--line);
+}
+.theme-btn:hover { transform: rotate(-8deg); }
+.theme-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+.theme-pop {
+  position: absolute; bottom: 42px; right: 0; z-index: 21;
+  width: 150px; padding: 8px;
+  display: flex; flex-direction: column; gap: 4px;
+  background: var(--card); border: 2.5px solid var(--line);
+  border-radius: 14px; box-shadow: 4px 4px 0 var(--line);
+}
+.theme-choice {
+  display: flex; align-items: center; gap: 10px;
+  background: none; border: 2px solid transparent; border-radius: 10px;
+  padding: 5px 8px; cursor: pointer; text-align: left;
+  font-family: var(--font-hand); font-size: 16px; color: var(--ink);
+}
+.theme-choice:hover { background: var(--paper-2); }
+.theme-choice.sel { border-color: var(--coral); background: var(--paper-2); }
+.theme-dot {
+  width: 22px; height: 22px; border-radius: 50%; flex: none;
+  border: 2px solid var(--line);
+}
 
 .summary {
   background: var(--card); border: 2.5px solid var(--line);

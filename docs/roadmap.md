@@ -41,6 +41,7 @@ Stop re-typing your budget every payday. No backend, no database.
 ## M4 — Polish & cross-platform reach
 
 **v1.0.0 shipped 2026-07-19 — first complete release: web + desktop, no stores.**
+**v1.1.0 — whole-app colour theme picker (Cream / Rosé / Mint / Sky).**
 
 - [x] Responsive layout / mobile-friendly UI
 - [x] PWA (installable) — the cheapest path to "it's on my phone"

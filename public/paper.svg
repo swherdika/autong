@@ -11,7 +11,9 @@
       <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0" />
     </filter>
   </defs>
-  <rect width="1200" height="1200" fill="#f0e3c6" />
+  <!-- Colour-neutral base: the theme's paper colour is multiplied under this
+       texture in CSS (background-blend-mode), so one texture themes to any hue. -->
+  <rect width="1200" height="1200" fill="#ffffff" />
   <rect width="1200" height="1200" filter="url(#wrinkle)" opacity="0.2" style="mix-blend-mode:multiply" />
   <rect width="1200" height="1200" filter="url(#grain)" opacity="0.14" style="mix-blend-mode:multiply" />
 </svg>
