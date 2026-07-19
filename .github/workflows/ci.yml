@@ -1,8 +1,8 @@
 name: CI
 
-# Backbone pipeline: lint, test, typecheck, and build the web/PWA on every
-# push and PR. Native-shell jobs (Tauri desktop, Capacitor Android/iOS) get
-# added here as each shell is scaffolded — they all build on this web output.
+# Fast quality gate: lint, test, typecheck, and build the web/PWA on every
+# push and PR. The slow multi-OS desktop builds live in release.yml (tag-
+# triggered) so this stays quick.
 
 on:
   push:
@@ -46,39 +46,4 @@ jobs:
         with:
           name: web-dist
           path: dist
-          if-no-files-found: error
-
-  desktop-windows:
-    name: Desktop app (Windows installer)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      # Cache the Rust build so subsequent runs aren't a full recompile.
-      - uses: swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - name: Install dependencies
-        run: npm ci
-
-      # `tauri build` runs `npm run build` first (beforeBuildCommand), then
-      # compiles the Rust shell and bundles the MSI + NSIS installers.
-      - name: Build desktop app
-        run: npm run tauri build
-
-      - name: Upload Windows installers
-        uses: actions/upload-artifact@v4
-        with:
-          name: autong-windows
-          path: |
-            src-tauri/target/release/bundle/msi/*.msi
-            src-tauri/target/release/bundle/nsis/*.exe
           if-no-files-found: error

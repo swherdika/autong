@@ -1,0 +1,79 @@
+name: Release (desktop)
+
+# Builds Autong for Windows, macOS (universal), and Linux, and publishes the
+# installers to a GitHub Release. Triggered by pushing a version tag (v*),
+# or run manually from the Actions tab to smoke-test the matrix (still drafts
+# a release). Builds are UNSIGNED for now — installers will trip SmartScreen
+# (Windows) / Gatekeeper (macOS); that needs paid certs, deferred.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to create the release + upload assets
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            args: ''
+          - platform: macos-latest
+            args: '--target universal-apple-darwin'
+          - platform: ubuntu-22.04
+            args: ''
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            build-essential \
+            libssl-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          # macOS builds a universal binary, so it needs both arch targets.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # On a tag push ref_name is the tag (e.g. v1.0.0); on a manual
+          # dispatch from main it's "main" (draft, fine for a smoke test).
+          tagName: ${{ github.ref_name }}
+          releaseName: Autong ${{ github.ref_name }}
+          releaseBody: |
+            Desktop builds for Windows, macOS, and Linux.
+
+            **Unsigned** — Windows SmartScreen ("More info → Run anyway") and
+            macOS Gatekeeper (right-click → Open) will warn on first launch.
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
